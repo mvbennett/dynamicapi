@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+import { MongoClient } from 'mongodb';
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(
@@ -6,8 +6,8 @@ export default async function handler(
   res: NextApiResponse
 ) {
   // connecting to my mongoDB to save the params to update app
-  const uri = `mongodb+srv://mikeysnakes:${process.env.MONGODB_PASS}@cluster0.qxordfu.mongodb.net/?retryWrites=true&w=majority`;
-  const client = await new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+  const uri = process.env.MONGODB_URI;
+  const client = await new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
   const collection = client.db('dynamicdb').collection('apis');
   // User will send an object with a string with the number of params and optionally the param names
   const params = req.body.paramNames.split(',') || [];
@@ -15,13 +15,15 @@ export default async function handler(
 
   // accounting for cases where param names aren't given or less than the number of params are given
   if (params.length !== paramNum) {
-    for (let i = (params.length - 1); i < paramNum; i++) {
-      params.push(`param${params.length}`)
+    if (params[0] === '') params[0] = 'param1';
+
+    for (let i = (params.length); i < paramNum; i++) {
+      params.push(`param${params.length + 1}`)
     }
   }
 
   const result = await collection.insertOne({
-    params,
+    ...params,
     paramNum,
     createdAt: new Date()
   });
@@ -29,7 +31,7 @@ export default async function handler(
   await client.close();
 
   res.status(200).json(result);
-  // console.log(req.body);
+  console.log(paramNum);
 
   res.status(200).json(result)
 }
