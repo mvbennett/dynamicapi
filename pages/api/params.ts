@@ -9,7 +9,11 @@ export default async function handler(
   const client = await new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
   const collection = client.db('dynamicapi').collection('params');
 
-  console.log(await collection.find({}).toArray());
+  const paramResults = await collection.find({}).sort({order: 1}).toArray();
 
-  res.status(200).json({params: await collection.find({}).sort({order: 1}).toArray()})
+  const params = {};
+
+  paramResults.forEach(result => params[result.param] = '');
+
+  res.status(200).json(params)
 }
