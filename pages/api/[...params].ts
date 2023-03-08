@@ -1,3 +1,3 @@
-export default function params() {
+export default function handler() {
 
 }
