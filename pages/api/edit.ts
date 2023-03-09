@@ -20,31 +20,20 @@ export default async function handler(
     console.log('if clause triggered');
 
     result = await collection.deleteMany({order: {$gt: paramNum}});
-    console.log(result);
-
-  } else if (paramNum > existingParams.length) {
+  } else if (paramNum > existingParams.length && (params[0] === '' || params[0] === null)) {
     // will add to existing params using names if applicable
+    for (let i = existingParams.length; i < paramNum; i++) {
+      let newParam = `param${i}`;
+      await collection.insertOne({
+        order: i,
+        newParam,
+        createdAt: new Date()
+      })
+    }
     result = 'param num is greater';
   } else {
     result = existingParams;
   }
-
-  // accounting for cases where param names aren't given or less than the number of params are given
-  // if (params.length !== paramNum) {
-  //   if (params[0] === '') params[0] = 'param1';
-
-  //   for (let i = (params.length); i < paramNum; i++) {
-  //     params.push(`param${params.length + 1}`)
-  //   }
-  // }
-
-  // const result = await params.map((param: string, index: number) => {
-  //   collection.insertOne({
-  //     order: index + 1,
-  //     param,
-  //     createdAt: new Date()
-  //   })
-  // });
 
   await client.close();
 

@@ -23,15 +23,20 @@ export default async function handler(
     }
   }
 
-  const result = await params.map((param: string, index: number) => {
-    collection.insertOne({
+  // To easily use insertMany
+  const paramObjects: any = [];
+
+  params.forEach((param: string, index: number) => {
+    paramObjects.push({
       order: index + 1,
       param,
       createdAt: new Date()
     })
   });
 
+  const result = await collection.insertMany(paramObjects);
+
   await client.close();
 
-  res.status(200).json(params)
+  res.status(200).json(result)
 }
