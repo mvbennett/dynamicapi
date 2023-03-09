@@ -17,22 +17,21 @@ export default async function handler(
   let result;
   if (paramNum < existingParams.length) {
     // will delete from existing params by reverse order
-    console.log('if clause triggered');
-
     result = await collection.deleteMany({order: {$gt: paramNum}});
   } else if (paramNum > existingParams.length && (params[0] === '' || params[0] === null)) {
     // will add to existing params using names if applicable
+    const paramObjects: any = [];
     for (let i = existingParams.length; i < paramNum; i++) {
-      let newParam = `param${i}`;
-      await collection.insertOne({
+      let newParam = params[i - existingParams.length] || `param${i}`;
+      paramObjects.push({
         order: i,
         newParam,
         createdAt: new Date()
       })
     }
-    result = 'param num is greater';
+    result = await collection.insertMany(paramObjects);
   } else {
-    result = existingParams;
+    result = {message: 'no change to param amount so params kept the same', params: existingParams};
   }
 
   await client.close();
