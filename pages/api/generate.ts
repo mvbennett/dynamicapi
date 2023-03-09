@@ -11,7 +11,7 @@ export default async function handler(
   const collection = client.db('dynamicapi').collection('params');
   collection.deleteMany({});
   // User will send an object with a string with the number of params and optionally the param names
-  const params = req.body.paramNames.split(',') || [];
+  const params = req.body.paramNames?.split(',') || [];
   const paramNum = parseInt(req.body.paramNum) || 0;
 
   // accounting for cases where param names aren't given or less than the number of params are given
@@ -33,5 +33,5 @@ export default async function handler(
 
   await client.close();
 
-  res.status(200).json(result)
+  res.status(200).json(params)
 }
